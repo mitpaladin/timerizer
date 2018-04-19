@@ -135,6 +135,18 @@ RSpec.describe Timerizer::Duration do
     end
   end
 
+  describe "#rounded_s" do
+    it "converts all units into a string" do
+      expect(
+        (1.hour 3.minutes 4.seconds).rounded_s
+      ).to eq("1 hour, 3 minutes")
+
+      expect(
+        (1.year 3.months 4.days).rounded_s(:long)
+      ).to eq("1 year, 3 months")
+    end
+  end
+
   describe "#to_s" do
     it "converts all units into a string" do
       expect(

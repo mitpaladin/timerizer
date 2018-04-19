@@ -642,6 +642,58 @@ module Timerizer
       end.join(format[:delimiter] || ', ')
     end
 
+    def rounded_s(format = :long, options = nil)
+      format =
+        case format
+        when Symbol
+          FORMATS.fetch(format)
+        when Hash
+          FORMATS.fetch(:long).merge(format)
+        else
+          raise ArgumentError, "Expected #{format.inspect} to be a Symbol or Ha\
+sh"
+        end
+
+      format = format.merge(options || {})
+
+      count =
+        if format[:count].nil? || format[:count] == :all
+          UNITS.count
+        else
+          format[:count]
+        end
+
+      format_units = format.fetch(:units)
+      allunits = self.to_units(*format_units.keys).select {|unit, n| n > 0}
+      units = allunits.first(2)
+      if units.empty?
+        units = {seconds: 0}
+      end
+
+      separator = format[:separator] || ' '
+      delimiter = format[:delimiter] || ', '
+      units.take(count).map do |unit, n|
+        unit_label = format_units.fetch(unit)
+
+        singular, plural =
+          case unit_label
+          when Array
+            unit_label
+          else
+            [unit_label, unit_label]
+          end
+
+          unit_name =
+            if n == 1
+              singular
+            else
+              plural || singular
+            end
+
+          [n, unit_name].join(separator)
+      end.join(format[:delimiter] || ', ')
+    end
+
     private
 
     # This method is like {#to_unit}, except it does not perform normalization
