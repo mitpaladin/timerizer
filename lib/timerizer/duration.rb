@@ -23,6 +23,7 @@ module Timerizer
   # {#denormalize} methods. For convenience, most methods perform normalization
   # on the input duration, so that some results or comparisons give more
   # intuitive values.
+  require 'pry'
   class Duration
     include Comparable
 
@@ -642,7 +643,7 @@ module Timerizer
       end.join(format[:delimiter] || ', ')
     end
 
-    def rounded_s(format = :long, options = nil)
+    def to_rounded_s(format = :long, options = nil)
       format =
         case format
         when Symbol
@@ -650,8 +651,7 @@ module Timerizer
         when Hash
           FORMATS.fetch(:long).merge(format)
         else
-          raise ArgumentError, "Expected #{format.inspect} to be a Symbol or Ha\
-sh"
+          raise ArgumentError, "Expected #{format.inspect} to be a Symbol or Hash"
         end
 
       format = format.merge(options || {})
@@ -666,6 +666,18 @@ sh"
       format_units = format.fetch(:units)
       allunits = self.to_units(*format_units.keys).select {|unit, n| n > 0}
       units = allunits.first(2)
+      last = allunits.first(2) - allunits.first(1)
+      last_unit = last[0][0]
+      last_1_unit_str = last_unit[0..-1]+"=1"
+      last_1_unit_hash = last_1_unit_str.scan(/(\w+)=(\d+)/).map {|k,v| [k.to_sym, v.to_i]}.to_h
+      test_duration = Duration.new(last_1_unit_hash)
+      remainder = allunits.first(3) - allunits.first(2)
+      remainder_unit = remainder[0][0]
+      remainder_number = remainder[0][1]
+      last_to_remainder_unit = test_duration.to_unit(remainder_unit)
+      if  remainder_number.to_f / last_to_remainder_unit >= 0.5
+        units[1][1] += 1
+      end 
       if units.empty?
         units = {seconds: 0}
       end
