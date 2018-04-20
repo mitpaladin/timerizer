@@ -23,7 +23,6 @@ module Timerizer
   # {#denormalize} methods. For convenience, most methods perform normalization
   # on the input duration, so that some results or comparisons give more
   # intuitive values.
-  require 'pry'
   class Duration
     include Comparable
 
